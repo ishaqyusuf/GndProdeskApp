@@ -1,0 +1,18 @@
+{
+  "runOnStartup": false,
+  "terminals": [
+    {
+      "splitTerminals": [
+        {
+          "name": "android",
+          "commands": ["npx react-native run-android"]
+        },
+
+        {
+          "name": "terminal",
+          "commands": []
+        }
+      ]
+    }
+  ]
+}
