@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, StackNavigationOptions } from "@react-navigation/stack"
 
- import React from 'react';
+ import React from "react";
 const Stack = createStackNavigator();
 export default function composeNavigationStack(stacks,props:any = {},options: StackNavigationOptions = {}) : any {
         return ( 

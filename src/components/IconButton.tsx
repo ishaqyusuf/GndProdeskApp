@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Pressable, StyleSheet } from 'react-native';
 // import { AntDesign } from '@expo/vector-icons';
 import { Icon } from '@rneui/themed';

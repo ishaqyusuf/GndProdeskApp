@@ -1,17 +1,25 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { fetchApi } from './use-fetch';
 import useStorage from './use-storage';
 
-const useForm = ({
+import { ActivityIndicator, Button, TextInput as PaperTextInput } from 'react-native-paper';
+
+import React from "react"
+
+const useForm: any = ({
   _rememberKey = null,
   _transformData = null,
   _formLoaded = null,
   _query = null,
   _success = null,
-  _url,
+  _url = null,
+  _key = "id",
+  _debug = false,
   ..._default
 }) => {
-  const [form, ctx] = useState<any>({
+
+  let keys = Object.keys(_default)
+  const [form, setForm] = useState<any>({
     ..._default,
   });
   function _saveState() {
@@ -38,32 +46,19 @@ const useForm = ({
   function _submit() {
     setSubmitting(true);
 
-    fetchApi({
-      debug: true,
-    })
-      .post(_url, _data(), _query)
+   const api = fetchApi({
+      debug: _debug,
+    });
+    const k = form[_key];
+    const req = k ? api.patch : api.post; 
+      req([_url,k], _data(), _query)
       .then((data) => {
-        //
-        // console.log(data);
         setSubmitting(false);
         _success && _success(data);
+        _set(_key,data[_key] ?? k)
       });
   }
-  function _set(k, v, saveState = true) {
-    return ctx((f) => {
-      f[k] = v;
-      if (!Object.keys(_default).includes(k)) _default[k] = v;
-      console.log(Object.keys(_default));
-
-      if (saveState) _saveState();
-      // console.log(f);
-      return {
-        ...f,
-      };
-    });
-    //   this[k] = v;
-    //   return this;
-  }
+ 
   async function __init() {
     console.log('>>>>>>>F<<<<<');
     // return;
@@ -72,9 +67,9 @@ const useForm = ({
       // console.log(_state);
       if (_state) {
         Object.entries(_state).map(([k, v]) => (form[k] = v));
-        ctx((f) => {
-          return f;
-        });
+        // ctx((f) => {
+        //   return f;
+        // });
       }
     }
   }
@@ -82,6 +77,40 @@ const useForm = ({
   // __init();
   const [_loading, setLoading] = useState(false);
   const [_submitting, setSubmitting] = useState(false);
-  return { state: form, ctx, _set, _submit, _saveState, _loading, _submitting };
+  function _set(key,value) {
+      if(!keys.includes(key))
+        keys.push(key)
+            setForm({
+              ...form,
+              [key]: value
+            });
+    }
+  return {
+    state: form,
+    _submit,
+    _saveState,
+    _loading,
+    _submitting,setForm,
+    _set,
+    Button: ({submit = false,cancel = false,children,...props}) => {
+      return (<Button onPress={() => {
+        
+      }} loading={_loading && submit} disabled={_loading} {...props}>
+        {_loading && submit && <ActivityIndicator/>}
+        {children}
+      </Button>)
+    },
+    Input: ({ label, name, ...props }) => {
+      return (   <PaperTextInput
+          {...props}
+          label={label}
+          value={form[name]}
+          onChangeText={(text) => {
+           _set(name,text)
+          }}
+        />
+      );
+    },
+  };
 };
 export default useForm;

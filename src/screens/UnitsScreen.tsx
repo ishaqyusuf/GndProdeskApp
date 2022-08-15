@@ -1,78 +1,91 @@
 import { BottomSheetComponent, useBottomSheet } from '@src/components/BottomSheet';
+import { DataDisplay } from '@src/components/Content';
 import ListPage, { _sheetOption } from '@src/components/ListPage';
 import useConsole from '@src/utils/use-console';
-import React, { Fragment, useContext, useEffect } from 'react';
-import {  ScrollView, StyleSheet,  View } from 'react-native';
-import { Appbar, List, Text } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import useList from '../utils/use-list'; 
- 
-// 
+import React, { Fragment, useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
+
+import useList from '../utils/use-list';
+
+//
 // const auth = Firebase.auth();
 
-const UnitsScreen   = ({navigation,props}) => { 
-     const list = useList({
+const UnitsScreen = ({ navigation, route, ...props }) => {
+  const list = useList({
     _url: 'homes',
     _query: {
-      // project_slug
+      ...(route?.params?.query ?? {}),
     },
-    options: [
-      // _sheetOption('Tasks',_click),
-      // _sheetOption('Manage Costs',_click),
-      _sheetOption('Delete',(item) => {
-        // list.delete
-      },{
-        color: 'red'
-      }),
-    ]
-   });
-   const viewer = useBottomSheet();
-
-   function _click(item) {
-     viewer.open(item)
-        }
-   useEffect(() => {
-      list.load();
-      useConsole.log("PROPS")
-      useConsole.log(JSON.stringify(props))
- },[])
-  return (
-    <ListPage addAction={
-      () => {}
-    } loader={list}>
-       <Appbar.Header className="bg-gray-100 shadow-none my-4">
-      <Appbar.BackAction onPress={() => {
-         navigation.goBack();
-      }} />
-        <Appbar.Content title="Units" subtitle="Lorem Ipsum Dolor" />
-    </Appbar.Header>
-    { list.items.map((item,i) => (<List.Item className="border-b border-gray-200"  key={i} title={item.app_title} onPress={
-      () => {
-        _click(item)
+    _extras: {
+      title: 'Units',
+    },
+    _transformExtras(e) {
+      if (!e) e = {};
+      if (e.project) {
+        e.title = e.project.title;
+        e.subtitle = e.project.builder_name;
+      } else {
+        e.title = 'Units';
       }
-    } description={item.project_title}/> )) }
+      return e;
+    },
+    _cache: true,
+    // _debug: true,
+  });
+  const option = useBottomSheet();
 
-    <BottomSheetComponent ctx={viewer}>
-      {viewer.data && (<Fragment>
-        <Text className="text-lg mb-6 font-bold">
-       {viewer.data.headline}
-      </Text>
-      <DataDisplay title="Status" value={viewer.data.sub_status} />
-      <DataDisplay title="Builder" value={viewer.data.builder_name} />
-      <DataDisplay title="" value="" />
-      <DataDisplay title="" value="" />
-      </Fragment>)}
-    </BottomSheetComponent>
-   </ListPage>
+  function _click(item) {
+    option.open(item);
+  }
+  useEffect(() => {
+    list.load();
+    useConsole.logScreen('PROJECTS');
+  }, []);
+  function addAction() {
+    // /
+  }
+  function UnitItem({ item, readonly = false }) {
+    return (
+      <Pressable
+        onPress={() => {
+          !readonly && _click(item);
+        }}
+      >
+        <View className="px-4 py-3 border-b border-gray-300">
+          <Text className="font-bold capitalize">{item.app_title}</Text>
+          <Text>{item.project_title}</Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  return (
+    <ListPage
+      {...{
+        navigation,
+        canGoBack: true,
+        header: true,
+        title: list.extras.title,
+        subtitle: list.extras.subtitle,
+        addAction,
+        loader: list,
+      }}
+    >
+      <BottomSheetComponent ctx={option}>
+        <UnitItem item={option.data} readonly={true} />
+
+        <Text className="text-lg mb-6 font-bold">{option.data.headline}</Text>
+        <DataDisplay title="Status" value={option.data.sub_status} />
+        <DataDisplay title="Builder" value={option.data.builder_name} />
+        <DataDisplay title="" value="" />
+        <DataDisplay title="" value="" />
+      </BottomSheetComponent>
+      {list.items.map((item, i) => (
+        <UnitItem key={i} item={item} />
+      ))}
+    </ListPage>
   );
-}
+};
 export default UnitsScreen;
-const styles = StyleSheet.create({
-  
-});
-export function DataDisplay({title,value}) {
-    return <View className="mb-3">
-      <Text className="font-bold mb-2">{title}</Text>
-      <Text>{value}</Text>
-    </View>
-}
+const styles = StyleSheet.create({});

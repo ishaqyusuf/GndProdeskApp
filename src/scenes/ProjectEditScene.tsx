@@ -1,5 +1,5 @@
 import { useAuth } from '@src/auth-provider';
-import React, { useContext } from 'react';
+import React, { useContext } from "react";
 import {  StyleSheet,  View } from 'react-native'; 
 
 const ProjectEditScene = ({navigation}) => {

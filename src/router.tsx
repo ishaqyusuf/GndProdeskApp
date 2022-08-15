@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
  
 
 import AuthLoading from './scenes/auth/AuthLoading';
@@ -15,7 +15,7 @@ const Stack = createNativeStackNavigator();
 
 // const Navigator = createAppContainer(AppStack);
 
-export default function Router(props) {
+export default function Router(props) { 
   return (
     <AuthProvider>
       <NavigationContainer>
@@ -25,6 +25,7 @@ export default function Router(props) {
           <Stack.Screen name="Loading" component={AuthLoading}/>
           <Stack.Screen name="Auth" component={LoginScreen}/>
           <Stack.Screen name="App" component={BaseStack}/>
+          {/*  */}
         </Stack.Navigator>
           </NavigationContainer>
     </AuthProvider> 

@@ -1,8 +1,8 @@
 import { Icon } from '@rneui/themed';
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Label from './Label';
-
+import {  TextInput as PaperTextInput } from 'react-native-paper';
 const Input: React.FC<any> = ({ prefix = null,
   useForm = null as any,
   rightIcon = null, dark = false, password = false, label = null, ...rest }) => {
@@ -58,3 +58,4 @@ const handlePasswordVisibility = () => {
   );
 }
 export default Input;
+ 

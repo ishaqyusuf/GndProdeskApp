@@ -1,7 +1,4 @@
 import qs from 'qs';
-import { useState } from 'react';
-import Config from 'react-native-config';
-import useConsole from './use-console';
 import useDevice from './use-device';
 import useStorage from './use-storage';
 // let __url = 'https://api.gndprodesk.com';
@@ -13,14 +10,14 @@ let _fetchApi = (url, options: IApiOption = {}) => {
     if (options.debug) {
       console.log('.');
       console.log('.');
-      console.warn('****API LOG START***');
+      console.log('****API LOG START***');
       console.log('.');
       console.log('.');
       options.log.map((l) => {
         console.log(l);
       });
       console.log('.');
-      console.warn('****API LOG END****');
+      console.log('****API LOG END****');
       console.log('.');
       console.log('.');
     }
@@ -79,17 +76,23 @@ let _fetchApi = (url, options: IApiOption = {}) => {
           return response.json();
         })
         .then((data) => {
-          options.log.push(`Success: ${data}`);
-
+          const { message, exception, trace, errors, error, success } = data;
+          if (message && exception && trace) {
+            options.log.push(message);
+            options.log.push(exception);
+            _reject(null);
+          } else {
+            options.log.push(`Response: ${JSON.stringify(data)}`);
+            if (error || errors) _reject(data?.error ?? data?.errors);
+            else _resolve(data);
+          }
           _printLog();
-          if (data?.error || data?.errors) _reject(data?.error ?? data?.errors);
-          else _resolve(data);
-        })
-        .catch((error) => {
-          options.log.push(`Error: ${error}`);
-          _printLog();
-          _reject(error);
         });
+      // .catch((error) => {
+      //   options.log.push(`Error: ${error}`);
+      //   _printLog();
+      //   _reject(error);
+      // });
       // _resolve({
       //   hello: 1,
       // });

@@ -1,5 +1,5 @@
 import {StyleSheet, Pressable, Text} from 'react-native';
-import React from 'react';
+import React from "react";
 
 const Button: React.FC<any> = ({
   title,

@@ -1,60 +1,115 @@
 import { useAuth } from '@src/auth-provider';
 import ListPage, { _sheetOption } from '@src/components/ListPage';
 import React, { useContext, useEffect, useState } from 'react';
-import {  ScrollView, StyleSheet,  View } from 'react-native';
-import { Card, List, Text } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import useList from '../utils/use-list'; 
-import { Appbar } from 'react-native-paper';
- 
-// 
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
+import useList from '../utils/use-list';
+import { BottomSheetComponent, useBottomSheet } from '@src/components/BottomSheet';
+import { DeleteMenuItem, MenuItem } from '@src/components/MenuItem';
+import { DataDisplay } from '@src/components/Content';
+
+//
 // const auth = Firebase.auth();
-const ProjectScreen   = ({navigation}) => {
-   function _click(item) {
-    navigation.navigate('UnitsPage',{
-               project_slug: item.slug
-            })
-        }
-   const auth = useAuth();
-     const list = useList({
+
+const ProjectScreen = ({ navigation, route }) => {
+  const option = useBottomSheet({
+    onOpen() {},
+  });
+
+  const auth = useAuth();
+  const list = useList({
     _url: 'v1/projects',
-    options: [
-      _sheetOption('Open',_click),
-      _sheetOption('Edit',(item) => {
-      }),
-      _sheetOption('Delete',(item) => {},{
-         color: 'red'
-      })
-    ]
-   });
-   useEffect(() => {
-      list.load(); 
-   },[])
+    _query: {
+      ...(route?.params?.query ?? {}),
+    },
+    _cache: true,
+  });
+  useEffect(() => {
+    list.load();
+  }, []);
 
-   // const [selected,setSelection] = 
-   
-   
-  return ( 
-  <ListPage loader={list}  addAction={() => navigation.navigate('')}>
-    <Appbar.Header className="bg-gray-100 shadow-none my-4">
-      <Appbar.BackAction onPress={() => {
-         navigation.goBack();
-      }} />
-        <Appbar.Content title="Projects" subtitle="Lorem Ipsum Dolor" />
-    </Appbar.Header>
-    { list.items.map((item,i) => (<List.Item  key={i} title={item.title} onPress={
-      () => {
-        _click(item)
-      } 
-    } onLongPress={
-         () => list.longPress(item)
-    } description={`${item.ref_no}  |  ${item.builder_name}`} /> )) } 
- </ListPage> 
+  // const [selected,setSelection] =
+
+  return (
+    <ListPage
+      navigation={navigation}
+      title="Projects"
+      header
+      canGoBack
+      loader={list}
+      addAction={() => navigation.navigate('ProjectEditScreen')}
+    >
+      {list.items.map((item, i) => (
+        <Item key={i} item={item} />
+      ))}
+
+      <BottomSheetComponent ctx={option}>
+        <Item item={option.data} readonly={true} />
+        <MenuItem
+          title="Edit Project"
+          onPress={() =>
+            navigation.navigate('ProjectEditScreen', {
+              project: option.data,
+            })
+          }
+        />
+        <MenuItem
+          title="Project Units"
+          onPress={() => {
+            navigation.navigate('UnitsScreen', {
+              query: {
+                project_slug: option.data.slug,
+              },
+            });
+          }}
+        />
+        <MenuItem
+          title="View Tasks"
+          onPress={() => {
+            navigation.navigate('TasksScreen', {
+              query: {
+                task_page: 'tasks',
+                project_slug: option.data.slug,
+              },
+            });
+          }}
+        />
+        <DeleteMenuItem menu={option} list={list} />
+      </BottomSheetComponent>
+    </ListPage>
   );
-}
+  function Item({ item, readonly = false }) {
+    return (
+      <Pressable
+        onPress={() => {
+          !readonly && option.open(item);
+        }}
+      >
+        <View className="px-4 py-3 border-b border-gray-300">
+          <View className="flex-row justify-between">
+            <Text className="font-bold">{item.title} </Text>
+            <Text className=""> {item.unit_count} </Text>
+          </View>
+          <View className="flex-row justify-between">
+            {/* <Text>{item.meta.lot_block}</Text> */}
+            <Text>
+              {item.ref_no} | {item.builder_name}
+            </Text>
+            {/* <Label status={item.install_status}/> */}
+          </View>
+          {readonly && (
+            <View>
+              <DataDisplay title="Address" value={item.address} />
+              <DataDisplay title="Supervisor" value={item.supervisor_name} />
+              <DataDisplay title="Units" value={item.unit_count} />
+            </View>
+          )}
+        </View>
+      </Pressable>
+    );
+  }
+};
+
+//
 export default ProjectScreen;
-const styles = StyleSheet.create({
-  
-});
-
-
+const styles = StyleSheet.create({});

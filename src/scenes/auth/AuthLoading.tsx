@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect} from "react";
 import {ActivityIndicator, View, Text} from 'react-native'; 
 
 import { useAuth } from "../../auth-provider";
