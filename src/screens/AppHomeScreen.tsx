@@ -1,9 +1,10 @@
-import { useAuth } from '@src/auth-provider';
+import { useFocusEffect } from '@react-navigation/native';
 import AdminNav from '@src/components/home/AdminNav';
 import HomeHeader from '@src/components/home/HomeHeader';
+import VirtualizedList from '@src/components/VirtualizedList';
 import useConsole from '@src/utils/use-console';
-import React, { useContext, useEffect } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { InteractionManager, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import TasksScreen from './TasksScreen';
 
 // fetchApi({debug: true})
@@ -12,17 +13,33 @@ import TasksScreen from './TasksScreen';
 // const auth = Firebase.auth();
 
 const AppHomeScreeen = ({ navigation }) => {
-  const auth = useAuth();
   //   const list = useList({
   //  _url: 'homes',
   // });
   //  list.load();
 
-  useEffect(() => {
-    useConsole.logScreen('HOME');
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        useConsole.logScreen('HOME');
+      });
+      return () => task.cancel();
+    }, [])
+  );
   return (
-    <ScrollView>
+    <VirtualizedList
+      refreshing={refreshing}
+      onRefresh={async () => {
+        setRefreshing(false);
+      }}
+    >
       <HomeHeader navigation={navigation} />
       <AdminNav navigation={navigation} />
 
@@ -31,13 +48,22 @@ const AppHomeScreeen = ({ navigation }) => {
         page: "production", 
         per_page: 5
       }} inject={true} />  */}
-      <TasksScreen
+
+      {/* <TasksScreen
         withStats={true}
         widget={true}
         navigation={navigation}
         query={{
           task_page: 'installation',
-          per_page: 5,
+        }}
+        inject={true}
+      /> */}
+      <TasksScreen
+        withStats={true}
+        widget={true}
+        navigation={navigation}
+        query={{
+          task_page: 'production',
         }}
         inject={true}
       />
@@ -58,7 +84,7 @@ const AppHomeScreeen = ({ navigation }) => {
          navigation.navigate('Homes')
       }
     } description={item.project_title}/> )) } */}
-    </ScrollView>
+    </VirtualizedList>
   );
 };
 export default AppHomeScreeen;

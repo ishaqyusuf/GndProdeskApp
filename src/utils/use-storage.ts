@@ -9,9 +9,11 @@ export default {
     let data: any = await AsyncStorage.getItem(key);
     if (data) {
       let _ = JSON.parse(data);
-      console.log(['GETTING STORAGE', key, _.value]);
+      // console.log(['GETTING STORAGE', key, _.value]);
+      console.log('GET STORAGE:', key);
       return _.value;
-      console.log('............');
+    } else {
+      console.log('NO SAVED DATA FOR: ', key);
     }
     // let _value = JSON.parse(data?.value ?? '{}')?.value ?? _default;
     // console.log([JSON.parse(data), data]);

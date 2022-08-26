@@ -1,15 +1,21 @@
 import { Text } from 'react-native-paper';
-import { useAuth } from '@src/auth-provider';
 import useConsole from '@src/utils/use-console';
 import { fetchApi } from '@src/utils/use-fetch';
 import { Icon } from '@rneui/themed';
-import React, { useContext, useEffect, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import {
+  Dimensions,
+  InteractionManager,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { createNavCardItem } from './NavCardItem';
+import { useData } from '@src/redux/reducers/data';
+import { useFocusEffect } from '@react-navigation/native';
 const PublicNav = ({ navigation, type }) => {
   const NavCardItem2 = ({ navigation, nav, ...props }) => {
-    const auth = useAuth();
-
     return (
       <Pressable
         onPress={() =>
@@ -26,7 +32,6 @@ const PublicNav = ({ navigation, type }) => {
         }}
       >
         <Text>
-          {' '}
           <Icon name={nav.icon} type="ionicon" />
         </Text>
         <View>
@@ -39,15 +44,15 @@ const PublicNav = ({ navigation, type }) => {
   let _item = createNavCardItem;
   const _card = {
     production: {
-      pending: _item('0', 'Pending', 'folder-open', 'TasksScreen', '#edd0a1'),
-      late: _item('0', 'Late', 'office', 'TasksScreen', '#f57749'),
-      completed: _item('0', 'Completed', 'office', 'TasksScreen', '#7cf578'),
-      total: _item('0', 'Total', 'office', 'TasksScreen', '#b3c2b2'),
+      pending: _item('0', 'Pending', 'alert-circle-outline', 'TasksScreen', '#edd0a1'),
+      late: _item('0', 'Late', 'alert-outline', 'TasksScreen', '#f57749'),
+      completed: _item('0', 'Completed', 'checkmark-done-outline', 'TasksScreen', '#7cf578'),
+      total: _item('0', 'Total', 'trending-up-outline', 'TasksScreen', '#b3c2b2'),
     },
     installation: {
-      pending: _item('0', 'Pending', 'folder-open', 'TasksScreen', '#edd0a1'),
-      completed: _item('0', 'Completed', 'office', 'TasksScreen', '#7cf578'),
-      total: _item('0', 'Total', 'office', 'TasksScreen', '#b3c2b2'),
+      pending: _item('0', 'Pending', 'alert-circle-outline', 'TasksScreen', '#edd0a1'),
+      completed: _item('0', 'Completed', 'checkmark-done-outline', 'TasksScreen', '#7cf578'),
+      total: _item('0', 'Total', 'layers-outline', 'TasksScreen', '#b3c2b2'),
     },
   }[type];
   const _rows = {
@@ -58,43 +63,51 @@ const PublicNav = ({ navigation, type }) => {
     installation: [['pending', 'completed'], ['total']],
   }[type];
 
-  const auth = useAuth();
-  const [data, setData] = useState<any>({
-    title: `${type} Overview`,
-    cards: _card,
-    loading: true,
+  // const [data, setData] = useState<any>({
+  //   title: ,
+  //   cards: _card,
+  //   loading: true,
+  // });
+  const title = `${type} Overview`;
+  const data = useData(title, {
+    url: 'unit-tasks',
+    query: {
+      page: type,
+      stats: true,
+    },
+    transform(resp) {
+      const cards = { ..._card };
+      Object.entries(resp).map(([k, v]) => (cards[k].title = v));
+      return {
+        cards,
+      };
+    },
+    _default: {
+      title,
+      // cards: { ..._card },
+    },
   });
-
-  useEffect(() => {
-    fetchApi({
-      debug: true,
-    })
-      .get('unit-tasks', {
-        page: type,
-        stats: true,
-      })
-      .then((resp) => {
-        let cards = data.cards;
-        Object.entries(resp).map(([k, v]) => (cards[k].title = v));
-        setData({
-          ...data,
-          cards,
-          loading: false,
-        });
+  useFocusEffect(
+    useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        data.load();
+        useConsole.log('TASK!');
       });
-  }, []);
+      return () => task.cancel();
+    }, [])
+  );
 
   return (
-    !data.loading && (
+    data.isReady && (
       <View className="flex-col">
         <View className="m-4">
-          <Text className="text-xl capitalize font-bold">{data.title}</Text>
+          <Text className="text-xl capitalize font-bold">{data.state.title}</Text>
         </View>
         <View className="px-2" style={styles.app}>
-          {_rows.map((sec) => (
-            <Row className="">
-              {sec.map((n) => (
-                <Col numRows={sec.length} className="m-4">
+          {_rows.map((sec, i) => (
+            <Row key={i} className="">
+              {sec.map((n, j) => (
+                <Col key={j} numRows={sec.length} className="m-4">
                   {/* <View className="bg-red-400 m-2">
        <Text>
         {
@@ -103,7 +116,11 @@ const PublicNav = ({ navigation, type }) => {
       </Text>
      </View> */}
 
-                  <NavCardItem2 className="m-4 " navigation={navigation} nav={data.cards[n]} />
+                  <NavCardItem2
+                    className="m-4 "
+                    navigation={navigation}
+                    nav={data.state.cards[n]}
+                  />
                 </Col>
               ))}
             </Row>

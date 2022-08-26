@@ -26,6 +26,7 @@ let _fetchApi = (url, options: IApiOption = {}) => {
     if (typeof path === 'string') {
       path = [path];
     }
+    console.log('PATH>', path);
     let _url = path.filter(Boolean).join('/');
 
     return [url, `${_url}?${qs.stringify(query ?? {})}`].filter(Boolean).join('/');
@@ -82,7 +83,7 @@ let _fetchApi = (url, options: IApiOption = {}) => {
             options.log.push(exception);
             _reject(null);
           } else {
-            options.log.push(`Response: ${JSON.stringify(data)}`);
+            if (options.debug) options.log.push(`Response: ${JSON.stringify(data)}`);
             if (error || errors) _reject(data?.error ?? data?.errors);
             else _resolve(data);
           }
@@ -122,8 +123,7 @@ function getUrl(path, query: any = null) {
 
 async function useFetchHeader(options) {
   let _headers: any = await useHeader._get(options);
-
-  options.log.push(`HEADER: ${JSON.stringify(_headers)}`);
+  if (options.debug) options.log.push(`HEADER: ${JSON.stringify(_headers)}`);
 
   let headers = new Headers();
   Object.entries({
@@ -177,6 +177,7 @@ export let useHeader = {
   async _get(options) {
     if (this.__header == {} || !this.__header) {
       await this.init();
+      // if(options.debug)
       options.log.push('INITIALIZING HEADER');
     }
     return this.__header;

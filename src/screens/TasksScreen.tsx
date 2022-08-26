@@ -1,11 +1,12 @@
+import { useFocusEffect } from '@react-navigation/native';
 import PublicNav from '@src/components/home/PublicNav';
 import PageLoader from '@src/components/ListPage';
 import InstallationsScene from '@src/scenes/auth/InstallationsScene';
 import ProductionsScene from '@src/scenes/auth/ProductionsScene';
 import TasksScene from '@src/scenes/auth/TasksScene';
-import useConsole from '@src/utils/use-console';
-import React, { Fragment, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { AppState } from '@src/utils/app-state-provider';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import useList from '../utils/use-list';
 
@@ -14,25 +15,35 @@ const TasksScreen = ({ navigation, ...props }) => {
     props.route?.params?.query ?? {
       task_page: 'task',
     };
-  const list = useList({
-    _url: 'unit-tasks',
-    // _debug: true,
-    _cache: true,
-    _query,
-  });
+  let list = composeList();
+  console.log(_query);
+  function composeList() {
+    let listName = [_query.project_slug, _query.unit_slug, _query.task_page, 'list']
+      .filter(Boolean)
+      .join('-');
+    return useList(listName, {
+      _url: 'unit-tasks',
+      // _debug: true,
+      _cache: true,
+      _query,
+    });
+  }
   //
-  useEffect(() => {
-    list.load();
-    useConsole.logScreen('TASKS');
-  }, []);
 
-  //
-  //  useConsole.log(props.query)
+  useFocusEffect(
+    useCallback(() => {
+      if (!list) list = composeList();
+      list.load();
+    }, [])
+  );
+
+  let TaskActions = {};
+  console.log(_query.task_page);
   let Context = {
     production: ProductionsScene,
     installation: InstallationsScene,
     task: TasksScene,
-  }[_query.task_page]({ list });
+  }[_query.task_page]({ list, TaskActions });
 
   const [title, setTitle] = useState(
     { task: 'Tasks', installation: 'Installations', production: 'productions' }[_query.task_page]
@@ -40,8 +51,9 @@ const TasksScreen = ({ navigation, ...props }) => {
   const [subtitle, setSubtitle] = useState({}[_query.task_page] ?? '');
 
   return (
-    <Fragment>
+    <>
       {props.withStats && <PublicNav type={_query.task_page} navigation={navigation} />}
+
       <PageLoader
         header={!props.widget}
         widget={props.widget}
@@ -50,11 +62,19 @@ const TasksScreen = ({ navigation, ...props }) => {
         title={title}
         subtitle={subtitle}
         loader={list}
+        Item={Context.Item}
       >
         <Context.App />
-        {list.items.map((item, i) => (
-          <Context.Item key={i} item={item} />
-        ))}
+        {/* <FlatList
+          data={list.state.items}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity>
+              <Context.Item item={item} />
+            </TouchableOpacity>
+          )}
+        /> */}
+
         {props.widget && (
           <View>
             <Button
@@ -70,7 +90,7 @@ const TasksScreen = ({ navigation, ...props }) => {
           </View>
         )}
       </PageLoader>
-    </Fragment>
+    </>
   );
 };
 export default TasksScreen;

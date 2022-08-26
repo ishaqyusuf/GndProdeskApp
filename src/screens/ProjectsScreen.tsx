@@ -1,32 +1,39 @@
-import { useAuth } from '@src/auth-provider';
 import ListPage, { _sheetOption } from '@src/components/ListPage';
-import React, { useContext, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { FlatList, Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import useList from '../utils/use-list';
 import { BottomSheetComponent, useBottomSheet } from '@src/components/BottomSheet';
 import { DeleteMenuItem, MenuItem } from '@src/components/MenuItem';
 import { DataDisplay } from '@src/components/Content';
+import { useFocusEffect } from '@react-navigation/native';
 
 //
 // const auth = Firebase.auth();
 
-const ProjectScreen = ({ navigation, route }) => {
+const ProjectsScreen = ({ navigation, route }) => {
   const option = useBottomSheet({
     onOpen() {},
   });
 
-  const auth = useAuth();
-  const list = useList({
+  const list = useList('projects', {
+    listName: 'projects',
     _url: 'v1/projects',
     _query: {
       ...(route?.params?.query ?? {}),
     },
+    // _debug: true,
     _cache: true,
+    _filter: {
+      search: 'Hello World',
+    },
   });
-  useEffect(() => {
-    list.load();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      console.log('>>>PROJECT SCREEN');
+      list.load();
+    }, [])
+  );
 
   // const [selected,setSelection] =
 
@@ -36,12 +43,25 @@ const ProjectScreen = ({ navigation, route }) => {
       title="Projects"
       header
       canGoBack
+      refreshable
       loader={list}
-      addAction={() => navigation.navigate('ProjectEditScreen')}
+      addAction={() =>
+        navigation.navigate('ProjectEditScreen', {
+          listName: list.listName,
+        })
+      }
+      Item={Item}
     >
-      {list.items.map((item, i) => (
+      {/* <FlatList
+        onScrollEndDrag={() => list.loadMore()}
+        data={list.state.items}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => <Item item={item} />}
+      /> */}
+
+      {/* {list.items.map((item, i) => (
         <Item key={i} item={item} />
-      ))}
+      ))} */}
 
       <BottomSheetComponent ctx={option}>
         <Item item={option.data} readonly={true} />
@@ -49,13 +69,15 @@ const ProjectScreen = ({ navigation, route }) => {
           title="Edit Project"
           onPress={() =>
             navigation.navigate('ProjectEditScreen', {
-              project: option.data,
+              data: option.data,
+              list,
             })
           }
         />
         <MenuItem
           title="Project Units"
           onPress={() => {
+            option.close();
             navigation.navigate('UnitsScreen', {
               query: {
                 project_slug: option.data.slug,
@@ -68,7 +90,7 @@ const ProjectScreen = ({ navigation, route }) => {
           onPress={() => {
             navigation.navigate('TasksScreen', {
               query: {
-                task_page: 'tasks',
+                task_page: 'task',
                 project_slug: option.data.slug,
               },
             });
@@ -97,19 +119,19 @@ const ProjectScreen = ({ navigation, route }) => {
             </Text>
             {/* <Label status={item.install_status}/> */}
           </View>
-          {readonly && (
-            <View>
-              <DataDisplay title="Address" value={item.address} />
-              <DataDisplay title="Supervisor" value={item.supervisor_name} />
-              <DataDisplay title="Units" value={item.unit_count} />
-            </View>
-          )}
         </View>
+        {readonly && (
+          <View>
+            <DataDisplay title="Address" value={item.address} />
+            <DataDisplay title="Supervisor" value={item.supervisor_name} />
+            <DataDisplay title="Units" value={item.unit_count} />
+          </View>
+        )}
       </Pressable>
     );
   }
 };
 
 //
-export default ProjectScreen;
+export default ProjectsScreen;
 const styles = StyleSheet.create({});

@@ -1,10 +1,10 @@
-import React, { useMemo, useReducer, useContext, createContext } from "react";
+import React, { useMemo, useReducer, useContext, createContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import axios from 'axios';
 
 //IMPORT REDUCER, INITIAL STATE AND ACTION TYPES
 import reducer, { initialState, LOGGED_IN, LOGGED_OUT } from './reducer';
-import useConsole from './utils/use-console';
+
 import useStorage from './utils/use-storage';
 import { useHeader } from './utils/use-fetch';
 
@@ -25,7 +25,7 @@ function AuthProvider(props) {
       //GET TOKEN && USER
       // let token = await AsyncStorage.getItem(TOKEN_KEY);
       let auth = await useStorage.get(AUTH_KEY);
- 
+
       if (auth !== null) await handleLogin(auth);
       else await handleLogout();
 
@@ -38,8 +38,7 @@ function AuthProvider(props) {
   // Handle Login
   const handleLogin = async (data) => {
     try {
-       
-      await useStorage.set(AUTH_KEY,data);
+      await useStorage.set(AUTH_KEY, data);
 
       //AXIOS AUTHORIZATION HEADER
       //   axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
@@ -56,7 +55,7 @@ function AuthProvider(props) {
     try {
       //REMOVE DATA
       await AsyncStorage.removeItem(AUTH_KEY);
-      useHeader.logout()
+      useHeader.logout();
       //AXIOS AUTHORIZATION HEADER
       //   delete axios.defaults.headers.common['Authorization'];
 

@@ -1,66 +1,94 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { BottomSheetComponent, useBottomSheet } from '@src/components/BottomSheet';
-import { DataDisplay } from '@src/components/Content';
 import ListPage, { _sheetOption } from '@src/components/ListPage';
-import useConsole from '@src/utils/use-console';
-import React, { Fragment, useContext, useEffect } from "react";
-import {  Pressable, ScrollView, StyleSheet,  View } from 'react-native';
-import { Appbar, List, Text } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import useList from '../utils/use-list'; 
- 
-// 
+import { DeleteMenuItem, MenuItem } from '@src/components/MenuItem';
+import React, { Fragment, useCallback, useEffect } from 'react';
+import { InteractionManager, Pressable, StyleSheet, View } from 'react-native';
+import { Appbar, Chip, List, Text } from 'react-native-paper';
+import useList from '../utils/use-list';
+
+//
 // const auth = Firebase.auth();
 
-const BuildersScreen   = ({navigation,props}) => { 
-     const list = useList({
+const BuildersScreen = ({ navigation, props }) => {
+  const list = useList('builders', {
     _url: 'builders',
-    _query: {
-      // project_slug
-    },
-     
-   });
-   const viewer = useBottomSheet();
+    _query: {},
+  });
+  const viewer = useBottomSheet();
 
-   function _click(item) {
-     viewer.open(item)
-        }
-   useEffect(() => {
-      list.load();
-      useConsole.log("PROPS")
-      useConsole.log(JSON.stringify(props))
- },[])
- function addAction() {
-  // /
- }
- function BuilderItem(item) {
-  return <Pressable onPress={() => {
-      _click(item)
-  }}>
-    <View className="mb-3 border-b border-gray-200">
-      <Text className="font-bold mb-2">{item.name}</Text>
-      <Text>{item.project_count}</Text>
-    </View>
-  </Pressable>
- }
-  return (
-    <ListPage {...{navigation,canGoBack:true,header:true,title:'Builders',subtitle: '',addAction,loader:list}}>
-    { list.items.map((item,i) => (<BuilderItem item={item}/> )) }
-
-    <BottomSheetComponent ctx={viewer}>
-      {viewer.data && (<Fragment>
-        <Text className="text-lg mb-6 font-bold">
-       {viewer.data.headline}
-      </Text>
-      <DataDisplay title="Status" value={viewer.data.sub_status} />
-      <DataDisplay title="Builder" value={viewer.data.builder_name} />
-      <DataDisplay title="" value="" />
-      <DataDisplay title="" value="" />
-      </Fragment>)}
-    </BottomSheetComponent>
-   </ListPage>
+  function _click(item) {
+    viewer.open(item);
+  }
+  useFocusEffect(
+    useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        list.load();
+      });
+      return () => task.cancel();
+    }, [])
   );
-}
+
+  function addAction() {
+    navigation.navigate('BuilderEditScreen', { listName: 'builders' });
+  }
+  function BuilderItem({ item }) {
+    return (
+      <Pressable
+        onPress={() => {
+          _click(item);
+        }}
+      >
+        <View className="px-4 py-3 border-b border-gray-300">
+          <Text className="font-bold capitalize">{item.name}</Text>
+          <View className="flex-row justify-between">
+            <Text>{item.project_count} Projects</Text>
+            <Text>{item.builderTasks?.length ?? 0} Tasks</Text>
+          </View>
+        </View>
+      </Pressable>
+    );
+  }
+  return (
+    <ListPage
+      {...{
+        navigation,
+        canGoBack: true,
+        header: true,
+        title: 'Builders',
+        subtitle: '',
+        addAction,
+        loader: list,
+      }}
+      Item={({ item }) => <BuilderItem item={item} />}
+    >
+      <BottomSheetComponent ctx={viewer}>
+        {viewer.data && (
+          <Fragment>
+            <Text className="text-lg mb-6 font-bold">{viewer.data.name}</Text>
+            <View>
+              <Text>Builder Tasks</Text>
+              {viewer.data.builderTasks.map((t, i) => (
+                <Chip key={i} icon="information">
+                  {t.name}
+                </Chip>
+              ))}
+            </View>
+            <MenuItem
+              title="Edit"
+              onPress={() =>
+                navigation.navigate('BuilderEditScreen', {
+                  data: viewer.data,
+                  list,
+                })
+              }
+            />
+            <DeleteMenuItem menu={viewer} list={list} />
+          </Fragment>
+        )}
+      </BottomSheetComponent>
+    </ListPage>
+  );
+};
 export default BuildersScreen;
-const styles = StyleSheet.create({
-  
-});
+const styles = StyleSheet.create({});

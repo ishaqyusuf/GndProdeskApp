@@ -1,16 +1,16 @@
-import { Text } from "react-native-paper";
-import React, { Fragment } from "react";
+import { Text } from 'react-native-paper';
+import React, { Fragment } from 'react';
 
-
-export function Label  ({status})
-{
+export function ColorLabel({ status }) {
   return (
-    <Text style={{
-      color: _statusColor(status) 
-    }}>
+    <Text
+      style={{
+        color: _statusColor(status),
+      }}
+    >
       {status}
     </Text>
-  )
+  );
 }
 export const _statusColor = (status) => {
   return status ? colors[status?.toLocaleLowerCase()?.split(' ')?.join('_')] ?? 'gray' : 'gray';
