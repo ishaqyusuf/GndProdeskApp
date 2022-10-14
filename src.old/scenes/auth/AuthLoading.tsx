@@ -14,10 +14,10 @@ export default function AuthLoading({ navigation }) {
     try {
       const { token } = await getAuthState();
 
-      if (token) {
-        navigation.navigate('App');
-        // navigation.navigate('Auth', {} )
-      } else navigation.navigate('Auth');
+      // if (token) {
+      //   navigation.navigate('App');
+      //   // navigation.navigate('Auth', {} )
+      // } else navigation.navigate('Auth');
     } catch (e) {
       navigation.navigate('Auth');
     }

@@ -48,12 +48,12 @@ const LoginScreen = ({ navigation }) => {
     Form._submit();
   }
   function _transformUser(data) {
-    const { viewInstallation, viewProject, viewProduction } = data?.can ?? {};
+    const { view_installation, view_project, view_production } = data?.can ?? {};
     return {
       ...data,
-      isAdmin: viewProject,
-      isInstaller: viewInstallation && !viewProject,
-      isProducer: viewProduction && !viewProject,
+      isAdmin: view_project,
+      isInstaller: view_installation && !view_project,
+      isProducer: view_production && !view_project,
     };
   }
   const [loginError, setLoginError] = useState('');

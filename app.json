@@ -1,4 +1,7 @@
 {
   "name": "GndProdeskApp",
-  "displayName": "GndProdeskApp"
+  "displayName": "GndProdeskApp",
+  "android": {
+    "package": "com.gndprodesk"
+  }
 }

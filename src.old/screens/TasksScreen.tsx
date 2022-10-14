@@ -22,7 +22,7 @@ const TasksScreen = ({ navigation, ...props }) => {
       .filter(Boolean)
       .join('-');
     return useList(listName, {
-      _url: 'unit-tasks',
+      _url: 'home-tasks',
       // _debug: true,
       _cache: true,
       _query,

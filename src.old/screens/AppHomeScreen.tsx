@@ -63,7 +63,7 @@ const AppHomeScreeen = ({ navigation }) => {
         widget={true}
         navigation={navigation}
         query={{
-          task_page: 'production',
+          production: true,
         }}
         inject={true}
       />

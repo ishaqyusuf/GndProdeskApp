@@ -10,7 +10,7 @@ export const initialState = {
   token: null,
   homeScreen: null,
 };
-export const AUTH_KEY = 'auth';
+export const AUTH_KEY = 'x-auth';
 export const keys = [AUTH_KEY];
 export const LOGGED_IN = `auth/LOGGED_IN`;
 export const LOGGED_OUT = `auth/LOGGED_OUT`;
@@ -44,7 +44,10 @@ export function useAuth() {
   const state = useSelector<any, any>((_state) => _state.auth);
   const handleLogin = async (data, fresh = false) => {
     try {
-      if (fresh) await useStorage.set(AUTH_KEY, data);
+      if (fresh) {
+        useHeader.login(data.token);
+        await useStorage.set(AUTH_KEY, data);
+      }
 
       //AXIOS AUTHORIZATION HEADER
       //   axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;

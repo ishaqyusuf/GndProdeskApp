@@ -5,6 +5,9 @@ import useStorage from './use-storage';
 async function _load(_ret = false) {
   let _data = await useStorage.get('user', {
     token: null,
+    can: {},
+    role: null,
+    user: null,
   });
   if (_ret) return _data;
   // setAuth({

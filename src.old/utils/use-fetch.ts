@@ -1,7 +1,7 @@
 import qs from 'qs';
 import useDevice from './use-device';
 import useStorage from './use-storage';
-// let __url = 'https://api.gndprodesk.com';
+// let __url = 'http://gndprodesk.test';
 let __url = 'http://localhost:8000';
 export let fetchApi = (options: IApiOption = {}) => _fetchApi(__url, options);
 let _fetchApi = (url, options: IApiOption = {}) => {
@@ -133,7 +133,6 @@ async function useFetchHeader(options) {
   }).map(([k, v]) => headers.append(k, v as any));
   return headers;
 }
-
 export let useHeader = {
   key: '_header',
   __header: null,
@@ -157,7 +156,7 @@ export let useHeader = {
     // options.log.push("LOGOUT");
     let session: any = await this.get();
     if (session) {
-      delete session['x-token'];
+      delete session['Authorization'];
       useStorage.set('_header', session);
       this.setHeader(session);
     } else {
@@ -165,7 +164,7 @@ export let useHeader = {
     }
   },
   login(token) {
-    this.set('x-token', token);
+    this.set('Authorization', `Bearer: ${token}`);
   },
   async set(key, value) {
     let _: any = await this.get();
