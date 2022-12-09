@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import { ImageBackground, ScrollView, Text, View } from 'react-native';
+import { ImageBackground, Text, View } from 'react-native';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 // import { useForm, Controller } from 'react-hook-form';
 import { doLogin } from '../../actions/auth';
-import Button from '../../components/Button';
 import useForm from '../../components/Form';
-import XInput from '../../components/XInput';
 const defaultProps = {
   onLogin: () => {},
   isLoggingIn: false,
@@ -24,7 +22,7 @@ const propTypes = {
   installationUrl: PropTypes.string,
 };
 const LoginScreenComponent = ({ navigation }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const isLoggingIn = useSelector<any, any>((state) => state.auth.isLoggingIn);
   const onSubmit = (data) => {
     console.log('SUBMITED!');

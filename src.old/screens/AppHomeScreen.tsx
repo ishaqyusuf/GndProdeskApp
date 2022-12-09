@@ -4,7 +4,7 @@ import HomeHeader from '@src/components/home/HomeHeader';
 import VirtualizedList from '@src/components/VirtualizedList';
 import useConsole from '@src/utils/use-console';
 import React, { useCallback, useState } from 'react';
-import { InteractionManager, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { InteractionManager, StyleSheet } from 'react-native';
 import TasksScreen from './TasksScreen';
 
 // fetchApi({debug: true})

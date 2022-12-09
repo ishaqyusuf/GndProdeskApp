@@ -22,7 +22,6 @@ const parseErrorCode = (error) => {
   } else {
     showToast({ message: 'Error' });
   }
-
   return Promise.reject(error.response);
 };
 
@@ -61,7 +60,9 @@ API.interceptors.response.use(
 );
 function transformUrl(url) {
   if (typeof url === 'string') return url;
-  return url.join('/');
+  const _url = url.join('/');
+  console.log(_url);
+  return _url;
 }
 const post = (url, data?, config?) => API.post(transformUrl(url), data, config);
 const patch = (url, data?, config?) => API.patch(transformUrl(url), data, config);

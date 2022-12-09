@@ -7,7 +7,6 @@ import { store } from '../store';
 export const getHeaders = async () => {
   try {
     const state = await store.getState();
-    console.log(state.auth);
     const {
       headers, //: { 'access-token': accessToken, uid, client },
       // user: { account_id: accountId },

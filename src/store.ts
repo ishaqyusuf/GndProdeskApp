@@ -16,7 +16,7 @@ if (__DEV__) middleware.push(createLogger());
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 const store = configureStore({
   reducer: persistedReducer,
-  // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middleware),
 });
 const persistor = persistStore(store);
 

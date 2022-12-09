@@ -33,7 +33,7 @@ const _useForm: any = ({
   const {
     control,
     handleSubmit,
-    register,
+    // register,
     formState: { errors, ...ext },
   } = useForm({
     mode: 'onBlur',
